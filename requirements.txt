@@ -1,10 +1,11 @@
 streamlit
 langchain-groq
 langchain
+langchain-core
 langchain-community
 faiss-cpu
 sentence-transformers
-pypdf2
+pypdf
 python-dotenv
 tiktoken
 langchain-text-splitters

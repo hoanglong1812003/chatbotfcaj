@@ -3,8 +3,9 @@ import streamlit as st
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain.chains import RetrievalQA
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -12,50 +13,54 @@ load_dotenv()
 @st.cache_resource
 def load_vectorstore():
     embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
+        model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     )
     vectorstore = FAISS.load_local("vectorstore", embeddings, allow_dangerous_deserialization=True)
     return vectorstore
 
 @st.cache_resource
-def setup_qa_chain():
+def setup_rag_chain():
     llm = ChatGroq(
         model="llama-3.1-8b-instant",
-        temperature=0.3,
+        temperature=0.2,
         groq_api_key=os.getenv("GROQ_API_KEY")
     )
     
     vectorstore = load_vectorstore()
+    retriever = vectorstore.as_retriever(
+        search_type="mmr",
+        search_kwargs={"k": 5, "fetch_k": 10}
+    )
     
-    prompt_template = """
-Bạn là chatbot hỗ trợ cho cộng đồng First Cloud Journey của AWS. 
-Hãy trả lời câu hỏi dựa trên thông tin được cung cấp.
+    template = """Bạn là chatbot hỗ trợ cho cộng đồng First Cloud Journey của AWS.
+Hãy phân tích kỹ thông tin được cung cấp và trả lời câu hỏi một cách chi tiết, chính xác.
 Nếu không tìm thấy thông tin, hãy nói "Tôi không tìm thấy thông tin này trong tài liệu".
 
-Thông tin: {context}
+Thông tin từ tài liệu:
+{context}
 
 Câu hỏi: {question}
 
-Trả lời:"""
+Trả lời chi tiết:"""
     
-    PROMPT = PromptTemplate(
-        template=prompt_template,
-        input_variables=["context", "question"]
+    prompt = ChatPromptTemplate.from_template(template)
+    
+    def format_docs(docs):
+        return "\n\n".join(f"[Tài liệu {i+1}]:\n{doc.page_content}" for i, doc in enumerate(docs))
+    
+    rag_chain = (
+        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        | prompt
+        | llm
+        | StrOutputParser()
     )
     
-    qa_chain = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=vectorstore.as_retriever(search_kwargs={"k": 3}),
-        chain_type_kwargs={"prompt": PROMPT}
-    )
-    
-    return qa_chain
+    return rag_chain
 
 def get_response(query):
     try:
-        qa_chain = setup_qa_chain()
-        response = qa_chain.run(query)
+        rag_chain = setup_rag_chain()
+        response = rag_chain.invoke(query)
         return response
     except Exception as e:
         return f"Lỗi: {str(e)}"

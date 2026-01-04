@@ -10,20 +10,21 @@ def process_documents():
     documents = loader.load()
     
     # Thêm text files
-    text_loader = DirectoryLoader('data/', glob="**/*.txt", loader_cls=TextLoader)
+    text_loader = DirectoryLoader('data/', glob="**/*.txt", loader_cls=TextLoader, loader_kwargs={'encoding': 'utf-8'})
     text_docs = text_loader.load()
     documents.extend(text_docs)
     
-    # Chia nhỏ documents
+    # Chia nhỏ documents với chunk size nhỏ hơn để tìm kiếm chính xác hơn
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=200
+        chunk_size=500,
+        chunk_overlap=100,
+        separators=["\n\n", "\n", ". ", " ", ""]
     )
     texts = text_splitter.split_documents(documents)
     
-    # Tạo embeddings
+    # Tạo embeddings với model tốt hơn
     embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
+        model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     )
     
     # Tạo vector store
