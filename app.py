@@ -15,10 +15,9 @@ load_dotenv()
 def normalize_query(question: str) -> str:
     q = question.lower()
     
-    # Chuẩn hóa tên người với ngôi xưng
     NAME_MAP = {
-        "anh Hưng": "Nguyễn Gia Hưng",
-        "sư phụ Hưng": "Nguyễn Gia Hưng",
+        "anh hưng": "Nguyễn Gia Hưng",
+        "sư phụ hưng": "Nguyễn Gia Hưng",
         "anh thiện": "Lữ Hoàn Thiện",
         "anh vĩ": "Trần Đại Vĩ",
         "anh long": "Huỳnh Hoàng Long",
@@ -33,7 +32,6 @@ def normalize_query(question: str) -> str:
         if k in q:
             q = q.replace(k, v)
     
-    # Chuẩn hóa FCAJ
     ENTITY_MAP = {
         "fcaj": "FCAJ",
         "fcj": "FCAJ",
@@ -53,16 +51,11 @@ def load_vectorstore():
         cache_folder="/tmp/huggingface"
     )
     
-    # Kiểm tra nếu vectorstore chưa tồn tại
     if not os.path.exists("vectorstore/index.faiss"):
-        st.error("⚠️ Vectorstore chưa được tạo. Vui lòng chạy `python process_docs.py` để tạo vectorstore.")
+        st.error("⚠️ Vectorstore chưa được tạo. Vui lòng chạy `python process_docs.py`")
         st.stop()
     
-    return FAISS.load_local(
-        "vectorstore",
-        embeddings,
-        allow_dangerous_deserialization=True
-    )
+    return FAISS.load_local("vectorstore", embeddings, allow_dangerous_deserialization=True)
 
 @st.cache_resource
 def setup_rag_chain():
@@ -73,90 +66,37 @@ def setup_rag_chain():
     )
 
     vectorstore = load_vectorstore()
-    retriever = vectorstore.as_retriever(
-        search_type="mmr",
-        search_kwargs={"k": 5, "fetch_k": 10}
-    )
+    retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5, "fetch_k": 10})
 
     SYSTEM_PROMPT = """Bạn là trợ lý AI của cộng đồng First Cloud AI Journey (FCAJ) - AWS Vietnam.
 
-THÔNG TIN VỀ FCAJ:
-- First Cloud AI Journey (FCAJ) là cộng đồng học AWS và Cloud Computing tại Việt Nam
-- Được thành lập bởi AWS Vietnam để hỗ trợ người học từ cơ bản đến nâng cao
+ĐỘI ADMIN FCAJ: Sư phụ Nguyễn Gia Hưng, Đội trưởng Lữ Hoàn Thiện, Admin: Trần Đại Vĩ, Huỳnh Hoàng Long, Phạm Hoàng Quy, Bùi Hoàng Việt, Đặng Thị Minh Thư, Lý Kiên Huy, Nguyễn Đỗ Thành Đạt
 
-ĐỘI ADMIN FCAJ (luôn sẵn sàng hỗ trợ hết mình):
-- Sư phụ: Nguyễn Gia Hưng
-- Đội trưởng: Lữ Hoàn Thiện
-- Các admin: Trần Đại Vĩ, Huỳnh Hoàng Long, Phạm Hoàng Quy, Bùi Hoàng Việt, Đặng Thị Minh Thư, Lý Kiên Huy, Nguyễn Đỗ Thành Đạt
+NỘI DUNG PROJECT (báo cáo cuối khóa):
+- Viết bằng 2 ngôn ngữ: tiếng Anh và tiếng Việt
+- Các phần: Thông tin sinh viên, Worklog (Week 1-12), Proposal, Events Participated, Workshop, Self-evaluation, Sharing and Feedback
 
-LƯU Ý VỀ CÁC LOẠI THẢNG ĐIỂM:
-Khi được hỏi về "thảng điểm" hoặc "cách tính điểm", hãy PHÂN BIỆT RÕ RÀNG:
-1. Thang điểm PROJECT: Đánh giá dự án cuối khóa
-2. Tiêu chí ĐÁNH GIÁ CUỐI KỲ: Kiểm tra kiến thức tổng hợp
-3. Thang điểm XỬ LÝ VI PHẠM: Trừ điểm khi vi phạm nội quy (đi trễ, vắng mặt...)
-
-Nếu câu hỏi KHÔNG RÕ loại thảng điểm nào, hãy LIỆT KÊ TẤT CẢ 3 LOẠI.
-
-QUY TẮC TRẢ LỜI:
-✅ Trả lời TỰ NHIÊN như đang nói chuyện
-✅ Đi thẳng vào nội dung, KHÔNG nói "dựa trên tài liệu", "theo tài liệu", "trong tài liệu"
+QUY TẮC:
 ✅ Dùng "trong chương trình" thay vì "trong tài liệu"
+✅ Khi không rõ: "Có phải ý bạn là...?"
 ✅ KHÔNG nhắc "Tài liệu 1, 2, 3..."
-✅ Khi câu hỏi KHÔNG RÕ RÀNG: Dùng "Có phải ý bạn là...?" thay vì "tôi suy đoán", "có thể", "có lẽ"
 
-Khi được hỏi CHÍNH XÁC "Bạn là ai" hoặc "Bạn là ai?":
-→ Trả lời: Tôi là trợ lý AI của cộng đồng First Cloud AI Journey (FCAJ)
-→ KHÔNG cần tìm trong thông tin
-
-Khi được hỏi về FCAJ hoặc đội admin:
-→ Trả lời dựa trên thông tin FCAJ và đội admin ở trên
-→ KHÔNG cần tìm trong thông tin
-
-Khi được hỏi "[Tên người] là ai":
-→ Tìm trong thông tin bên dưới
-→ Nếu KHÔNG có: "Hiện chưa có thông tin về người này trong chương trình FCAJ"
-→ KHÔNG dùng "suy đoán", "có thể", "có lẽ"
-
-Khi được hỏi về kiến thức khác:
-→ Đọc thông tin bên dưới và trả lời TRỰC TIẾP
-→ Nếu có: Trả lời ngắn gọn, bullet points
-→ Nếu không có: "Hiện chưa có thông tin này trong chương trình FCAJ"
-
-VÍ DỤ:
-❌ SAI: "Dựa trên tài liệu được cung cấp, FCAJ có 3 chương trình..."
-✅ ĐÚNG: "FCAJ có 3 chương trình chính: ..."
-
-❌ SAI: "Theo tài liệu 2, điểm trừ là..."
-✅ ĐÚNG: "Điểm trừ khi đi trễ là..."
-
-❌ SAI: "Tôi suy đoán bạn muốn hỏi về..."
-✅ ĐÚNG: "Có phải ý bạn là hỏi về...?"
+Khi hỏi "Bạn là ai": Tôi là trợ lý AI của FCAJ
+Khi hỏi về FCAJ/admin/project: Dùng thông tin trên
+Khi hỏi kiến thức khác: Tìm trong thông tin bên dưới
 """
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", SYSTEM_PROMPT),
-        ("human", """
-Thông tin từ tài liệu:
-{context}
-
-Câu hỏi:
-{question}
-""")
+        ("human", "Thông tin:\n{context}\n\nCâu hỏi:\n{question}")
     ])
 
     def format_docs(docs):
-        if not docs:
-            return ""
-        return "\n\n".join(doc.page_content for doc in docs)
+        return "\n\n".join(doc.page_content for doc in docs) if docs else ""
 
     rag_chain = (
-        {
-            "context": retriever | format_docs,
-            "question": RunnablePassthrough()
-        }
-        | prompt
-        | llm
-        | StrOutputParser()
+        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        | prompt | llm | StrOutputParser()
     )
 
     return rag_chain
@@ -170,38 +110,28 @@ def get_response(question: str) -> str:
         return f"⚠️ Lỗi: {str(e)}"
 
 st.set_page_config(
-    page_title="First Cloud AI Journey Assistant",
+    page_title="FCAJ Assistant",
     page_icon="☁️",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
         'Get Help': 'https://rules.fcjuni.com/',
-        'Report a bug': 'https://github.com/hoanglong1812003/chatbotfcaj/issues',
-        'About': '''
-        # FCAJ Chatbot
-        Trợ lý AI của cộng đồng First Cloud AI Journey.
-        
-        Phiên bản: 1.0.0
-        '''
+        'About': '# FCAJ Chatbot v1.0'
     }
 )
 
 st.header("☁️ First Cloud AI Journey Assistant")
 st.markdown("""
 <div style='background: linear-gradient(90deg, #FF9900 0%, #FF6600 100%); 
-            padding: 10px; 
-            border-radius: 10px; 
-            margin-bottom: 20px;'>
+            padding: 10px; border-radius: 10px; margin-bottom: 20px;'>
     <p style='color: white; text-align: center; margin: 0; font-size: 1.1em;'>
-        🚀 Chatbot hỗ trợ cộng đồng First Cloud AI Journey (FCAJ) - AWS Vietnam
+        🚀 Chatbot hỗ trợ cộng đồng FCAJ - AWS Vietnam
     </p>
 </div>
 """, unsafe_allow_html=True)
 
 with st.sidebar:
     st.markdown("### 📚 Tài nguyên FCAJ")
-    
-    # Links quan trọng
     st.markdown("""
     📜 [Quy định FCAJ](https://rules.fcjuni.com/)
     
@@ -228,7 +158,6 @@ with st.sidebar:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Hiển thị lời chào và gợi ý khi chưa có tin nhắn
 if len(st.session_state.messages) == 0:
     with st.chat_message("assistant"):
         st.markdown("""
@@ -243,7 +172,6 @@ Tôi có thể giúp bạn:
 Hãy thử các câu hỏi gợi ý bên dưới! 👇
         """)
     
-    # Các nút gợi ý câu hỏi
     col1, col2 = st.columns(2)
     
     with col1:
@@ -260,19 +188,17 @@ Hãy thử các câu hỏi gợi ý bên dưới! 👇
             st.session_state.messages.append({"role": "user", "content": "FCAJ là gì?"})
             st.rerun()
         
-        if st.button("⚠️ Xử lý vi phạm ra sao?"):
-            st.session_state.messages.append({"role": "user", "content": "Xử lý vi phạm ra sao?"})
+        if st.button("📝 Nội dung project là gì?"):
+            st.session_state.messages.append({"role": "user", "content": "Nội dung project là gì?"})
             st.rerun()
 
 for m in st.session_state.messages:
     with st.chat_message(m["role"]):
         st.markdown(m["content"])
 
-# Xử lý câu hỏi từ button gợi ý
 if len(st.session_state.messages) > 0:
     last_msg = st.session_state.messages[-1]
     if last_msg["role"] == "user":
-        # Kiểm tra xem đã có response chưa
         if len(st.session_state.messages) == 1 or st.session_state.messages[-2]["role"] == "assistant":
             with st.chat_message("assistant"):
                 with st.spinner("🔍 Đang xử lý..."):
