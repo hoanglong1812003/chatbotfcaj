@@ -1,33 +1,35 @@
-version: "3.8"
+FROM python:3.11-slim
 
-services:
-  chatbot:
-    image: fcj-chatbot:latest   # ⬅️ dùng image đã build
-    container_name: fcj-chatbot
-    ports:
-      - "8501:8501"
+# ===== ENV =====
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    HF_HOME=/tmp/huggingface \
+    TRANSFORMERS_CACHE=/tmp/huggingface \
+    TORCH_HOME=/tmp/torch
 
-    env_file:
-      - .env
+WORKDIR /app
 
-    environment:
-      GROQ_API_KEY: ${GROQ_API_KEY}
+# ===== System deps =====
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-    volumes:
-      - ./vectorstore:/app/vectorstore
-      - hf-cache:/tmp/huggingface   # ⬅️ cache model
-      - torch-cache:/tmp/torch
+# ===== Python deps =====
+COPY requirements.txt .
 
-    restart: unless-stopped
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir \
+        torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir -r requirements.txt
 
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: 4G
-        reservations:
-          memory: 2G
+# ===== App code =====
+COPY app.py .
+COPY .streamlit .streamlit
 
-volumes:
-  hf-cache:
-  torch-cache:
+EXPOSE 8501
+
+HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health || exit 1
+
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]

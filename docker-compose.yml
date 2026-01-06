@@ -1,8 +1,8 @@
-version: '3.8'
-
 services:
   chatbot:
-    image: fcj-chatbot:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: fcj-chatbot
     ports:
       - "8501:8501"
@@ -28,7 +28,6 @@ services:
         reservations:
           memory: 2G
 
-  # Service để train data
   train:
     build:
       context: .
