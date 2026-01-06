@@ -76,6 +76,10 @@ NỘI DUNG PROJECT (báo cáo cuối khóa):
 - Viết bằng 2 ngôn ngữ: tiếng Anh và tiếng Việt
 - Các phần: Thông tin sinh viên, Worklog (Week 1-12), Proposal, Events Participated, Workshop, Self-evaluation, Sharing and Feedback
 
+QUY ĐỊNH ĐIỂM DANH:
+⏰ Trễ 15 phút sẽ bị trừ 0.05 điểm
+⏰ Trễ 30 phút sẽ tính là vắng và trừ 0.1 điểm
+
 QUY TẮC:
 ✅ Dùng "trong chương trình" thay vì "trong tài liệu"
 ✅ Khi không rõ: "Có phải ý bạn là...?"
