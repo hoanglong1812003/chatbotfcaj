@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  chatbot:
+    image: fcj-chatbot:latest
+    container_name: fcj-chatbot
+    ports:
+      - "8501:8501"
+
+    env_file:
+      - .env
+
+    environment:
+      GROQ_API_KEY: ${GROQ_API_KEY}
+
+    volumes:
+      - ./vectorstore:/app/vectorstore
+      - hf-cache:/tmp/huggingface
+      - torch-cache:/tmp/torch
+
+    restart: unless-stopped
+
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+        reservations:
+          memory: 2G
+
+  # Service để train data
+  train:
+    build:
+      context: .
+      dockerfile: Dockerfile.train
+    container_name: fcj-train
+    volumes:
+      - ./data:/app/data
+      - ./vectorstore:/app/vectorstore
+      - hf-cache:/tmp/huggingface
+    profiles:
+      - train
+
+volumes:
+  hf-cache:
+  torch-cache:

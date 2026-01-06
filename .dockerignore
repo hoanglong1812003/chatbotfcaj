@@ -1,0 +1,11 @@
+.git
+__pycache__/
+*.pyc
+
+vectorstore/
+.cache/
+.cache-huggingface/
+.cache-torch/
+.streamlit/cache/
+
+.env
