@@ -52,6 +52,12 @@ def load_vectorstore():
         model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
         cache_folder="/tmp/huggingface"
     )
+    
+    # Kiểm tra nếu vectorstore chưa tồn tại
+    if not os.path.exists("vectorstore/index.faiss"):
+        st.error("⚠️ Vectorstore chưa được tạo. Vui lòng chạy `python process_docs.py` để tạo vectorstore.")
+        st.stop()
+    
     return FAISS.load_local(
         "vectorstore",
         embeddings,
@@ -166,16 +172,58 @@ def get_response(question: str) -> str:
 st.set_page_config(
     page_title="First Cloud AI Journey Assistant",
     page_icon="☁️",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': 'https://rules.fcjuni.com/',
+        'Report a bug': 'https://github.com/hoanglong1812003/chatbotfcaj/issues',
+        'About': '''
+        # FCAJ Chatbot
+        Trợ lý AI của cộng đồng First Cloud AI Journey.
+        
+        Phiên bản: 1.0.0
+        '''
+    }
 )
 
 st.header("☁️ First Cloud AI Journey Assistant")
-st.subheader("Chatbot hỗ trợ cộng đồng First Cloud AI Journey (FCAJ)")
+st.markdown("""
+<div style='background: linear-gradient(90deg, #FF9900 0%, #FF6600 100%); 
+            padding: 10px; 
+            border-radius: 10px; 
+            margin-bottom: 20px;'>
+    <p style='color: white; text-align: center; margin: 0; font-size: 1.1em;'>
+        🚀 Chatbot hỗ trợ cộng đồng First Cloud AI Journey (FCAJ) - AWS Vietnam
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 with st.sidebar:
-    st.markdown("### 📘 Hướng dẫn")
-    if st.button("🔄 Làm mới"):
+    st.markdown("### 📚 Tài nguyên FCAJ")
+    
+    # Links quan trọng
+    st.markdown("""
+    📜 [Quy định FCAJ](https://rules.fcjuni.com/)
+    
+    🎥 [Kênh YouTube](https://www.youtube.com/@AWSStudyGroup)
+    
+    📚 [Tài liệu học tập](https://cloudjourney.awsstudygroup.com/)
+    """)
+    
+    st.markdown("---")
+    st.markdown("### 🛠️ Công cụ")
+    
+    if st.button("🔄 Làm mới cuộc trò chuyện"):
         st.session_state.messages = []
+        st.rerun()
+    
+    st.markdown("---")
+    st.markdown("""
+    <div style='text-align: center; color: #666; font-size: 0.8em;'>
+    🚀 Powered by FCAJ Team<br>
+    © 2026 First Cloud AI Journey
+    </div>
+    """, unsafe_allow_html=True)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []

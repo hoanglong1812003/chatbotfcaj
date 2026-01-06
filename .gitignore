@@ -8,10 +8,6 @@
 *.ipynb
 Notebook_Experiments/
 
-# Vector database
-vectorstore/
-*.faiss
-*.pkl
 
 # Python
 __pycache__/
