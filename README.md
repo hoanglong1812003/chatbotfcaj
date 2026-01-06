@@ -1,21 +1,21 @@
 # First Cloud Journey Assistant
 
-## Hướng dẫn setup:
+## Setup Guide:
 
-### Cách 1: Chạy với Docker (Khuyến nghị)
+### Option 1: Run with Docker (Recommended)
 
-1. **Cài đặt Docker:**
-   - Tải Docker Desktop: https://www.docker.com/products/docker-desktop
+1. **Install Docker:**
+   - Download Docker Desktop: https://www.docker.com/products/docker-desktop
 
-2. **Build và chạy:**
+2. **Build and run:**
 ```bash
 docker-compose up --build
 ```
 
-3. **Truy cập:**
-   - Mở trình duyệt: http://localhost:8501
+3. **Access:**
+   - Open browser: http://localhost:8501
 
-### Cách 2: Chạy local
+### Option 2: Run locally
 
 1. **Clone repository:**
 ```bash
@@ -23,27 +23,27 @@ git clone https://github.com/hoanglong1812003/chatbotfcaj.git
 cd chatbotfcaj
 ```
 
-2. **Cài đặt packages:**
+2. **Install packages:**
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Cấu hình API key:**
+3. **Configure API key:**
 ```bash
 cp .env.example .env
-# Chỉnh sửa .env và thêm GROQ_API_KEY
+# Edit .env and add GROQ_API_KEY
 ```
 
-4. **Chuẩn bị dữ liệu:**
-- Tạo thư mục `data/`
-- Đặt tài liệu PDF/TXT vào thư mục `data/`
+4. **Prepare data:**
+- Create `data/` folder
+- Place PDF/TXT documents in `data/` folder
 
-5. **Xử lý tài liệu:**
+5. **Process documents:**
 ```bash
 python process_docs.py
 ```
 
-6. **Chạy chatbot:**
+6. **Run chatbot:**
 ```bash
 streamlit run app.py
 ```
@@ -54,36 +54,36 @@ streamlit run app.py
 # Build image
 docker build -t fcj-chatbot .
 
-# Chạy container
+# Run container
 docker run -p 8501:8501 --env-file .env fcj-chatbot
 
-# Dừng container
+# Stop container
 docker-compose down
 
-# Xem logs
+# View logs
 docker-compose logs -f
 ```
 
-## Cấu trúc thư mục:
+## Directory Structure:
 ```
-├── data/                 # Tài liệu training (không push lên git)
-├── vectorstore/          # Vector database (tự động tạo, không push)
-├── app.py               # Ứng dụng chính
-├── process_docs.py      # Script xử lý tài liệu
+├── data/                 # Training documents (not pushed to git)
+├── vectorstore/          # Vector database (auto-generated, not pushed)
+├── app.py               # Main application
+├── process_docs.py      # Document processing script
 ├── requirements.txt     # Dependencies
 ├── Dockerfile           # Docker configuration
 ├── docker-compose.yml   # Docker Compose config
-├── .env.example        # Template cho API keys
-├── .gitignore          # Loại trừ file nhạy cảm
-└── README.md           # Hướng dẫn
+├── .env.example        # Template for API keys
+├── .gitignore          # Exclude sensitive files
+└── README.md           # Documentation
 ```
 
-## Lưu ý bảo mật:
-- File `.env` chứa API keys - KHÔNG push lên git
-- Thư mục `data/` có thể chứa tài liệu nhạy cảm - đã loại trừ
-- Vector database tự động tạo - không cần push
+## Security Notes:
+- `.env` file contains API keys - DO NOT push to git
+- `data/` folder may contain sensitive documents - excluded
+- Vector database is auto-generated - no need to push
 
-## Sử dụng:
-- Mỗi khi thêm tài liệu mới, chạy lại `process_docs.py`
-- Chatbot sẽ trả lời dựa trên tài liệu đã training
-- Nếu không tìm thấy thông tin, chatbot sẽ thông báo
+## Usage:
+- Re-run `process_docs.py` whenever adding new documents
+- Chatbot will answer based on trained documents
+- If information is not found, chatbot will notify
