@@ -69,7 +69,9 @@ jobs:
           pip install pytest pytest-cov
           
       - name: Run tests
-        run: pytest --cov=. --cov-report=xml
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          pytest --cov=. --cov-report=xml
 
   build:
     name: Build Docker Image
