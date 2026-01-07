@@ -1,9 +1,0 @@
-version: "1"
-services:
-  - type: web
-    name: fcaj-chatbot
-    env: docker
-    plan: free
-    envVars:
-      - key: GROQ_API_KEY
-        sync: false

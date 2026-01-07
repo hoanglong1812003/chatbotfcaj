@@ -8,7 +8,6 @@
 *.ipynb
 Notebook_Experiments/
 
-
 # Python
 __pycache__/
 *.py[cod]
@@ -20,12 +19,16 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+test/
 
 # Data files (có thể chứa thông tin nhạy cảm)
 data/
 *.pdf
 *.docx
 *.xlsx
+
+# Vector database
+vectorstore/
 
 # Streamlit
 .streamlit/secrets.toml
@@ -47,3 +50,12 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Docker
+*.tar.gz
+image.tar.gz

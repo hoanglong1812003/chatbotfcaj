@@ -1,11 +1,33 @@
 .git
+.github
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
 vectorstore/
+data/
+test/
+tests/__pycache__/
+
 .cache/
 .cache-huggingface/
 .cache-torch/
 .streamlit/cache/
 
 .env
+.env.*
+*.log
+
+# Documentation
+*.md
+DEPLOYMENT.md
+GITHUB_SECRETS.md
+
+# IDE
+.vscode/
+.idea/
+
+# Build artifacts
+*.tar.gz
+image.tar.gz
