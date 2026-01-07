@@ -24,7 +24,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker-compose build --no-cache
+          docker compose build
           echo "Build completed successfully"
 
   deploy:
@@ -38,6 +38,6 @@ jobs:
       - name: Deploy with Docker
         run: |
           echo "Deploying application..."
-          docker-compose down || true
-          docker-compose up -d --build
+          docker compose down || true
+          docker compose up -d --build
           echo "Application deployed successfully"
