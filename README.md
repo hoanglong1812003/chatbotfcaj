@@ -1,4 +1,4 @@
-# First Cloud Journey Assistant
+# First Cloud AI Journey Assistant
 
 An intelligent RAG-based chatbot designed to assist the First Cloud AI Journey (FCAJ) community with AWS and cloud computing knowledge, program rules, and administrative information.
 
