@@ -2,19 +2,42 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
 
 jobs:
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Docker image
+        run: |
+          docker-compose build --no-cache
+          echo "Build completed successfully"
+
   deploy:
     name: Deploy Application
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    needs: build
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
-          
-      - name: Deploy to local
+
+      - name: Deploy with Docker
         run: |
           echo "Deploying application..."
           docker-compose down || true
           docker-compose up -d --build
-          echo "Application deployed at http://localhost:8501"
+          echo "Application deployed successfully"
