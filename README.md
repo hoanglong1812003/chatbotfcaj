@@ -1,5 +1,27 @@
 # First Cloud Journey Assistant
 
+An intelligent RAG-based chatbot designed to assist the First Cloud AI Journey (FCAJ) community with AWS and cloud computing knowledge, program rules, and administrative information.
+
+## Tech Stack
+
+### AI/ML Framework
+- **LangChain** - Orchestration framework for LLM applications
+- **Groq** - High-performance LLM inference (Llama 3.1 8B)
+- **HuggingFace Transformers** - Multilingual embeddings (paraphrase-multilingual-MiniLM-L12-v2)
+
+### Vector Database
+- **FAISS** - Efficient similarity search and document retrieval
+
+### Frontend
+- **Streamlit** - Interactive web interface
+
+### DevOps
+- **Docker** - Containerization
+- **Docker Compose** - Multi-container orchestration
+
+### Language
+- **Python 3.x** - Core programming language
+
 ## Setup Guide:
 
 ### Option 1: Run with Docker (Recommended)
@@ -87,3 +109,13 @@ docker-compose logs -f
 - Re-run `process_docs.py` whenever adding new documents
 - Chatbot will answer based on trained documents
 - If information is not found, chatbot will notify
+
+## CI/CD Pipeline
+
+Automated deployment pipeline with GitHub Actions:
+- **Lint**: Code quality checks (flake8, black)
+- **Test**: Automated testing with pytest
+- **Build**: Docker image creation
+- **Deploy**: Auto-deploy to development on `develop` branch
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed CI/CD documentation.
