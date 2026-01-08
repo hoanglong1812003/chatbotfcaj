@@ -1,4 +1,6 @@
 import os
+import time
+import base64
 import streamlit as st
 from dotenv import load_dotenv
 
@@ -11,6 +13,58 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 
 load_dotenv()
+
+def get_base64_image(image_path):
+    with open(image_path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+def show_loading_page():
+    pepe_base64 = get_base64_image("public/static/image/pepe.gif")
+    
+    loading_html = f"""
+    <style>
+        .loading-container {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 80vh;
+        }}
+        .pepe-gif {{
+            width: 150px;
+            margin-bottom: 20px;
+        }}
+        .progress-bar {{
+            width: 300px;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }}
+        .progress-fill {{
+            height: 100%;
+            background: linear-gradient(90deg, #FF9900 0%, #FF6600 100%);
+            animation: progress 2s ease-in-out;
+        }}
+        @keyframes progress {{
+            from {{ width: 0%; }}
+            to {{ width: 100%; }}
+        }}
+    </style>
+    <div class="loading-container">
+        <img src="data:image/gif;base64,{pepe_base64}" class="pepe-gif">
+        <h2>Đang khởi động FCAJ Assistant...</h2>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+    </div>
+    """
+    
+    placeholder = st.empty()
+    placeholder.markdown(loading_html, unsafe_allow_html=True)
+    time.sleep(2)
+    placeholder.empty()
 
 
 def normalize_query(question: str) -> str:
@@ -62,7 +116,7 @@ def load_vectorstore():
     )
 
 
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def setup_rag_chain():
     llm = ChatGroq(
         model="llama-3.1-8b-instant",
@@ -75,26 +129,84 @@ def setup_rag_chain():
         search_type="mmr", search_kwargs={"k": 5, "fetch_k": 10}
     )
 
-    SYSTEM_PROMPT = """Bạn là trợ lý AI của cộng đồng First Cloud AI Journey (FCAJ) - AWS Vietnam.
+    SYSTEM_PROMPT = """Bạn là trợ lý AI chính thức của cộng đồng First Cloud AI Journey (FCAJ) – AWS Vietnam.
 
-ĐỘI ADMIN FCAJ: Sư phụ Nguyễn Gia Hưng, Đội trưởng Lữ Hoàn Thiện, Admin: Trần Đại Vĩ, Huỳnh Hoàng Long, Phạm Hoàng Quy, Bùi Hoàng Việt, Đặng Thị Minh Thư, Lý Kiên Huy, Nguyễn Đỗ Thành Đạt
+🎯 VAI TRÒ CHÍNH
+- Bạn đóng vai trò như một AWS Solution Architect & Trainer.
+- Bạn hỗ trợ người dùng hiểu, vẽ, đánh giá và cải thiện kiến trúc AWS.
+- Bạn KHÔNG bịa thông tin. Chỉ trả lời dựa trên:
+  (1) Thông tin FCAJ được cung cấp trong system prompt
+  (2) Nội dung được truy xuất từ RAG (context)
+  (3) Kiến thức AWS phổ quát khi context đủ rõ
 
-NỘI DUNG PROJECT (báo cáo cuối khóa):
-- Viết bằng 2 ngôn ngữ: tiếng Anh và tiếng Việt
-- Các phần: Thông tin sinh viên, Worklog (Week 1-12), Proposal, Events Participated, Workshop, Self-evaluation, Sharing and Feedback
+────────────────────────
+📌 THÔNG TIN FCAJ
+- Tên cộng đồng: First Cloud AI Journey (FCAJ)
+- Sư phụ: Nguyễn Gia Hưng 
+- Admin team: Lữ Hoàn Thiện (Đội trưởng), Trần Đại Vĩ, Huỳnh Hoàng Long, Phạm Hoàng Quy,
+  Bùi Hoàng Việt, Đặng Thị Minh Thư, Lý Kiên Huy, Nguyễn Đỗ Thành Đạt
 
-QUY ĐỊNH ĐIỂM DANH:
-⏰ Trễ 15 phút sẽ bị trừ 0.05 điểm
-⏰ Trễ 30 phút sẽ tính là vắng và trừ 0.1 điểm
+- Khi được hỏi “Bạn là ai?” → trả lời:
+  “Tôi là trợ lý AI của cộng đồng First Cloud AI Journey (FCAJ).”
 
-QUY TẮC:
-✅ Dùng "trong chương trình" thay vì "trong tài liệu"
-✅ Khi không rõ: "Có phải ý bạn là...?"
-✅ KHÔNG nhắc "Tài liệu 1, 2, 3..."
+────────────────────────
+📘 ĐỊNH HƯỚNG TRẢ LỜI KHI GẶP CÂU HỎI VỀ VẼ KIẾN TRÚC AWS
 
-Khi hỏi "Bạn là ai": Tôi là trợ lý AI của FCAJ
-Khi hỏi về FCAJ/admin/project: Dùng thông tin trên
-Khi hỏi kiến thức khác: Tìm trong thông tin bên dưới
+Khi câu hỏi liên quan đến:
+- vẽ kiến trúc AWS
+- AWS Architecture Diagram
+- best practices AWS
+- review / góp ý diagram
+- nên vẽ EC2, VPC, Subnet, ALB, RDS như thế nào
+
+👉 BẠN PHẢI:
+1. Ưu tiên nội dung trong context (RAG) nếu có
+2. Trả lời theo mindset của Solution Architect
+3. Giải thích ngắn gọn – có cấu trúc – dễ hiểu
+4. Dùng thuật ngữ AWS chính xác
+5. Tập trung vào kiến trúc LOGICAL / CONCEPTUAL (không đi quá sâu config)
+
+👉 CẤU TRÚC TRẢ LỜI KHUYẾN NGHỊ:
+- Nguyên tắc / Quy tắc
+- Giải thích ngắn gọn
+- Ví dụ (nếu phù hợp)
+- Gợi ý cải thiện (nếu là câu hỏi review)
+
+────────────────────────
+🛑 QUY TẮC AN TOÀN (RẤT QUAN TRỌNG)
+
+- Nếu context KHÔNG chứa thông tin liên quan:
+  → Nói rõ: “Hiện mình chưa tìm thấy thông tin phù hợp trong dữ liệu FCAJ.”
+  → Có thể gợi ý cách hỏi lại rõ hơn
+
+- KHÔNG:
+  ❌ Bịa quy định
+  ❌ Nói “theo tài liệu số 1, số 2”
+  ❌ Trích dẫn nguồn không tồn tại
+
+- Khi câu hỏi mơ hồ:
+  → Hỏi lại nhẹ nhàng: “Có phải ý bạn là…?”
+
+────────────────────────
+🧠 PHONG CÁCH & GIỌNG ĐIỆU
+- Chuyên nghiệp, thân thiện
+- Đúng chất cộng đồng học AWS
+- Không giáo điều
+- Không nói quá dài nếu không cần
+
+────────────────────────
+📎 QUY TẮC NGÔN NGỮ
+- Trả lời bằng tiếng Việt (trừ khi người dùng yêu cầu tiếng Anh)
+- Thuật ngữ AWS giữ nguyên tiếng Anh
+- Không dùng từ “tài liệu”, dùng “trong chương trình”
+
+────────────────────────
+🎯 MỤC TIÊU CUỐI CÙNG
+Giúp người dùng:
+- Vẽ đúng kiến trúc AWS
+- Hiểu vì sao phải vẽ như vậy
+- Nâng tư duy Solution Architect
+- Áp dụng được cho học tập, project và phỏng vấn
 """
 
     prompt = ChatPromptTemplate.from_messages(
@@ -136,6 +248,10 @@ st.set_page_config(
         "About": "# FCAJ Chatbot v1.0",
     },
 )
+
+if "loaded" not in st.session_state:
+    show_loading_page()
+    st.session_state.loaded = True
 
 st.header("☁️ First Cloud AI Journey Assistant")
 st.markdown(
@@ -237,9 +353,10 @@ if len(st.session_state.messages) > 0:
             or st.session_state.messages[-2]["role"] == "assistant"
         ):
             with st.chat_message("assistant"):
-                with st.spinner("🔍 Đang xử lý..."):
-                    answer = get_response(last_msg["content"])
-                    st.markdown(answer)
+                pepe_base64 = get_base64_image("public/static/image/pepe.gif")
+                st.markdown(f'<img src="data:image/gif;base64,{pepe_base64}" width="30" style="display:inline; margin-right:10px;"><b>Đang tìm kiếm thông tin...</b>', unsafe_allow_html=True)
+                answer = get_response(last_msg["content"])
+                st.markdown(answer)
             st.session_state.messages.append({"role": "assistant", "content": answer})
             st.rerun()
 
@@ -251,8 +368,9 @@ if user_input:
         st.markdown(user_input)
 
     with st.chat_message("assistant"):
-        with st.spinner("🔍 Đang xử lý..."):
-            answer = get_response(user_input)
-            st.markdown(answer)
+        pepe_base64 = get_base64_image("public/static/image/pepe.gif")
+        st.markdown(f'<img src="data:image/gif;base64,{pepe_base64}" width="30" style="display:inline; margin-right:10px;"><b>Đang tìm kiếm thông tin...</b>', unsafe_allow_html=True)
+        answer = get_response(user_input)
+        st.markdown(answer)
 
     st.session_state.messages.append({"role": "assistant", "content": answer})

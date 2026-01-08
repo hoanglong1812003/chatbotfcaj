@@ -39,7 +39,7 @@ def process_documents():
     vectorstore = FAISS.from_documents(texts, embeddings)
     vectorstore.save_local("vectorstore")
 
-    print(f"Đã xử lý {len(texts)} chunks từ {len(documents)} tài liệu")
+    print(f"Da xu ly {len(texts)} chunks tu {len(documents)} tai lieu")
 
 
 if __name__ == "__main__":
