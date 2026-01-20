@@ -1,0 +1,42 @@
+ACCURACY: 63.33%
+
+Test 1:
+Q: Sư phụ FCAJ là ai?
+A: Sư phụ FCAJ là Nguyễn Gia Hưng, người sáng lập và Head of Solutions Architect của FCAJ.
+Score: 100.0%
+
+Test 2:
+Q: Admin FCAJ gồm những ai?
+A: Admin FCAJ không được đề cập rõ ràng trong văn bản. Tuy nhiên, có thể suy đoán rằng Admin FCAJ bao gồm các thành viên quan trọng của FCAJ, bao gồm:
+
+- Nguyễn Gia Hưng (Head of Solutions Architect Viet Nam)
+- Các thành viên của FCJ SWAT Team (hơn 30 nhân sự kỹ thuật)
+- Các cộng đồng AWS Study Group & AWS Community Builders
+
+Tuy nhiên, thông tin chính xác về Admin FCAJ không được cung cấp trong văn bản.
+Score: 0.0%
+
+Test 3:
+Q: FCAJ là gì?
+A: FCAJ là viết tắt của FIRST CLOUD AI JOURNEY.
+Score: 66.7%
+
+Test 4:
+Q: Cách tính điểm FCAJ như thế nào?
+A: Tôi không thấy thông tin về cách tính điểm FCAJ trong văn bản bạn cung cấp. Tuy nhiên, có thể bạn đang tìm kiếm thông tin về cách tính điểm trong chương trình FCAJ Workforce. 
+
+Nếu vậy, tôi có thể đưa ra một số giả định dựa trên thông tin đã có:
+
+- FCAJ Workforce có thể là một chương trình đào tạo hoặc huấn luyện, và điểm số có thể được tính dựa trên kết quả học tập, tham gia hoạt động, hoặc đánh giá của giảng viên.
+- Có thể điểm số được tính dựa trên các tiêu chí như:
+ + Hoàn thành các bài giảng và lab
+ + Tham gia các hoạt động và thảo luận trong cộng đồng
+ + Đánh giá của giảng viên hoặc các thành viên trong cộng đồng
+- Tuy nhiên, để biết chính xác cách tính điểm FCAJ, bạn nên liên hệ trực tiếp với FCAJ hoặc tham khảo các tài liệu chính thức của chương trình.
+Score: 100.0%
+
+Test 5:
+Q: EC2 là gì?
+A: EC2 (Elastic Compute Cloud) là một dịch vụ của AWS (Amazon Web Services) cho phép bạn tạo và quản lý các máy ảo (virtual machines) trên đám mây. EC2 cho phép bạn chạy các ứng dụng và dịch vụ của mình trên các máy ảo có thể được mở rộng hoặc giảm thiểu theo nhu cầu của bạn.
+Score: 50.0%
+
